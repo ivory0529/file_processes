@@ -23,6 +23,78 @@
 
 ---
 
+## 安装流程
+
+### 1. Dify 工作流结果自动导出到本地目录
+
+本项目可通过 Dify 工作流 + 自定义代码节点，将生成的内容（如 OCR 或结构化数据）**自动导出到本地磁盘目录**，便于下载、分析和后续处理。  
+实现方式是：在 Dify 的 sandbox 容器与宿主机之间做 volume 映射，实现工作流内保存的文件实时同步到本地。
+
+---
+
+### 步骤一：准备 Sandbox 目录（容器 + 本地）
+
+#### 1.1 进入 sandbox 容器，创建导出目录
+
+```bash
+# 进入 Dify sandbox 容器（容器名以实际为准，通常是 docker-sandbox-1）
+docker exec -it docker-sandbox-1 bash
+
+# 切换到临时目录
+cd /var/sandbox/sandbox-python/tmp/
+
+# 创建用于导出的文件夹
+mkdir file
+
+# 推荐给予全目录写权限
+chmod -R 777 /var/sandbox/sandbox-python/tmp/
+```
+
+### 1.2 在本地机器创建挂载目录
+
+```python
+cd /dify/docker/volumes/sandbox/
+mkdir file
+chmod -R 777 file
+```
+
+### 步骤二: 配置 Docker 映射
+
+编辑 docker-compose.yaml，在 sandbox 节点下的 volumes: 增加如下内容：
+
+```bash
+cd /dify/docker/volumes/sandbox/
+mkdir file
+chmod -R 777 file
+```
+
+完成后重启 Dify 服务
+
+### 步骤三：Dify 工作流内自定义导出代码
+
+在 Dify 工作流中，插入一个 Python 代码节点，参考如下代码：
+
+```python
+import os
+import json
+
+def main(arg1: list, user_id: str) -> dict:
+    # 文件将导出到容器映射目录
+    file_path = f'/tmp/file/{user_id}_response.json'
+    directory = os.path.dirname(file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    json_str = json.dumps(arg1, ensure_ascii=False, indent=4)
+    with open(file_path, 'w', encoding='utf-8') as f:
+        f.write(json_str)
+    return {
+        "result": f'文件生成完毕：{file_path}'
+    }
+
+```
+
+运行 Dify 工作流后，可在本地 ./volumes/sandbox/file/ 目录直接找到对应的输出文件，如 user_xxx_response.json 或 .txt。
+
 ## 快速开始
 
 ### 1. 安装依赖
