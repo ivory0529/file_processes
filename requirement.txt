@@ -1,0 +1,25 @@
+# OCR与AI相关
+mistralai>=0.3.3         # 你用的是mistralai官方SDK
+
+# 数据处理
+pandas>=1.4.0
+
+# Excel支持（pandas写Excel会用到openpyxl）
+openpyxl>=3.1.0
+
+# 环境变量
+python-dotenv>=1.0.0
+
+# 网络请求
+requests>=2.25.0
+
+# GUI（tkinter自带，不需要写）
+# 如果你用的是Python官方发行版自带的Tkinter，则不需要在这里加。部分极简Linux环境可能要单独apt/yum装 tk。
+
+# 其它
+# logging, threading, datetime, pathlib, json, base64, glob, sys 等都为标准库，无需指定
+
+# 选配（加速/兼容/调试用）
+# tqdm         # 如果你后面有命令行进度条可以用
+# pillow       # 如果有图片处理需求
+# pyinstaller  # 如果要打包exe
